@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# LaTeX local build artifacts (Overleaf handles these; don't commit them)
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+
+# OS
+.DS_Store
+Thumbs.db
+
+# sensitive (contains patent info) -- never publish
+BUILD_PLAN_CORRECTED.md
+
+# levitator / 6-array material (patent) -- never publish
+phased_array_sim.py
+MASTER_REPORT.md
+MASTER_REPORT.docx

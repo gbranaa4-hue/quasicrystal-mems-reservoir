@@ -1,0 +1,177 @@
+================================================================================
+A SYMMETRY SELECTION RULE FOR EVEN-ORDER PHYSICAL COMPUTATION
+   why a periodic plate is "blind" to product tasks and a quasicrystal is not
+================================================================================
+
+This is the analytic backbone of the rung-5/6 finding: the quasicrystal's
+advantage on even-order reservoir-computing tasks is not a numerical accident,
+it is an exact consequence of point-group symmetry. The result is a theorem;
+the FEM simulation merely obeys it. Numerical confirmation is at the bottom.
+
+
+--------------------------------------------------------------------------------
+1. THE QUANTITY THAT MATTERS
+--------------------------------------------------------------------------------
+In the reduced (modal) model, the only term that generates PRODUCTS of inputs
+-- and hence can compute an even-order task such as y = u[n-1]*u[n-2] -- is the
+quadratic self-nonlinearity of each mode. Its strength for mode i is
+
+      c2_i  =  integral over the plate of  phi_i(x,y)^3  dA ,
+
+where phi_i is the transverse mode shape. (A purely cubic/odd nonlinearity is
+invariant under u -> -u and provably cannot produce an even output; so c2_i is
+the gatekeeper for even-order computation. The cubic coefficient
+c3_i = integral phi_i^4 has an EVEN integrand and is never forbidden -- which is
+exactly why odd-order tasks show no quasicrystal advantage.)
+
+CLAIM: on a plate whose hole pattern and boundary have the square's point-group
+symmetry D4, c2_i = 0 EXACTLY for every mode except those of one symmetry type.
+
+
+--------------------------------------------------------------------------------
+2. WHY THE INTEGRAL PROJECTS ONTO THE TRIVIAL REPRESENTATION
+--------------------------------------------------------------------------------
+Let G = D4 be the symmetry group (order 8). Integrating any function f over a
+G-symmetric domain is invariant under replacing f by its group average,
+
+      integral f dA  =  integral ( (1/|G|) sum_{g in G} g.f ) dA .
+
+The group average (1/|G|) sum_g g.f is the projection of f onto the TRIVIAL
+(totally symmetric) representation A1. Therefore
+
+      integral f dA  != 0   only if   f contains an A1 component.
+
+We apply this with f = phi_i^3.
+
+
+--------------------------------------------------------------------------------
+3. D4 CHARACTER TABLE
+--------------------------------------------------------------------------------
+Classes:   E      2C4     C2      2sigma_v     2sigma_d
+           (id)  (+-90)  (180)  (axis mirr)  (diag mirr)
+
+   A1        1      1      1         1            1      (totally symmetric)
+   A2        1      1      1        -1           -1
+   B1        1     -1      1         1           -1
+   B2        1     -1      1        -1            1
+   E         2      0     -2         0            0      (2-dimensional)
+
+(Check: 1^2+1^2+1^2+1^2+2^2 = 8 = |G|.)
+
+
+--------------------------------------------------------------------------------
+4. THE CUBE OF EACH IRREP -- WHICH MODES CAN SURVIVE
+--------------------------------------------------------------------------------
+phi_i^3 transforms as the symmetric cube Sym^3(rho) of the mode's irrep rho.
+We need: does Sym^3(rho) contain A1?
+
+(a) One-dimensional irreps (rho = A1, A2, B1, B2). Here phi^3 transforms as
+    rho^3 (the ordinary cube of the 1-D character). Using the table:
+
+       A1^3 = A1                      CONTAINS A1   ->  c2 may be nonzero
+       A2^3 = A2  (since A2^2=A1)     no A1         ->  c2 = 0
+       B1^3 = B1  (since B1^2=A1)     no A1         ->  c2 = 0
+       B2^3 = B2  (since B2^2=A1)     no A1         ->  c2 = 0
+
+(b) The two-dimensional irrep E. Use the symmetric-cube character
+       chi_Sym3(g) = (1/6)[ chi(g)^3 + 3 chi(g) chi(g^2) + 2 chi(g^3) ].
+    With chi_E = [E:2, C4:0, C2:-2, sigma:0] one finds (g, g^2, g^3 tracked
+    per element):
+
+       chi_Sym3(E)      = (1/6)[2^3 + 3*2*2 + 2*2]       = 24/6 = 4   (= dim, ok)
+       chi_Sym3(C4)     = (1/6)[0  + 3*0*(-2) + 2*0]     = 0
+       chi_Sym3(C2)     = (1/6)[(-2)^3 + 3*(-2)*2 + 2*(-2)] = -24/6 = -4
+       chi_Sym3(sigma_v)= (1/6)[0  + 3*0*2 + 2*0]        = 0
+       chi_Sym3(sigma_d)= 0
+
+    So Sym^3(E) has characters [4, 0, -4, 0, 0]. Decomposing against the table
+    (classes weighted by size 1,2,1,2,2):
+
+       n_A1 = (1/8)[1*4*1 + 2*0 + 1*(-4)*1 + 0 + 0] = (4 - 4)/8 = 0
+       n_E  = (1/8)[1*4*2 + 0 + 1*(-4)*(-2) + 0 + 0] = (8 + 8)/8 = 2
+       n_A2 = n_B1 = n_B2 = 0
+
+       => Sym^3(E) = 2E ,   which CONTAINS NO A1.
+
+CONCLUSION. integral phi_i^3 dA = 0 for EVERY irrep except A1. Only A1
+(totally symmetric) modes can carry a nonzero product-generating term.
+
+
+--------------------------------------------------------------------------------
+5. HOW MANY MODES ARE KILLED
+--------------------------------------------------------------------------------
+Under the symmetry-projected Weyl law, the fraction of modes (counted with
+degeneracy: an E pair counts twice) in irrep rho approaches
+
+       f_rho  =  (dim rho)^2 / |G| .
+
+For D4:   f_A1 = f_A2 = f_B1 = f_B2 = 1/8 ,   f_E = 4/8 = 1/2 .
+
+So asymptotically only f_A1 = 1/8 = 12.5% of modes can have a nonzero c2; the
+remaining 7/8 = 87.5% are FORBIDDEN by symmetry. That 87.5% is the origin of
+the "~88% of periodic modes have a dead quadratic term" measured numerically.
+
+(Finite-size note: the 1/8 is a large-mode-count limit. In the lowest 40 modes
+the symmetric sectors are over-represented -- the fundamental is always A1 --
+so the measured A1 count runs a bit high (here 20%); but the EXACT part of the
+theorem, that all non-A1 modes vanish, holds mode by mode regardless.)
+
+
+--------------------------------------------------------------------------------
+6. THE QUASICRYSTAL LIFTS THE RULE
+--------------------------------------------------------------------------------
+A de Bruijn / aperiodic perforation has NO exact point-group symmetry (its only
+symmetries are statistical). With no nontrivial g leaving the operator
+invariant, there is no projection forcing phi^3 onto a non-A1 sector, so
+generically
+
+       integral phi_i^3 dA != 0   for (almost) ALL modes.
+
+Aperiodicity does not "add richness"; it REMOVES a prohibition. Every mode
+regains its product-generating term. That is the entire mechanism of the
+even-order advantage.
+
+
+--------------------------------------------------------------------------------
+7. NUMERICAL CONFIRMATION  (verify_selection_rule.py, real FEM modes)
+--------------------------------------------------------------------------------
+Each of the first 40 FEM modes was classified by its D4 character (by applying
+the 8 symmetry operations to the mode shape) and its cube integral measured:
+
+  PERIODIC plate (D4 symmetric):
+    - mode characters come out as CLEAN irreps, e.g.
+          A1 = [+1,+1,+1,+1,+1]   B1 = [+1,-1,+1,+1,-1]
+          B2 = [+1,-1,+1,-1,+1]   E  = [+1, 0,-1, 0, 0]
+    - mean |integral phi^3|:  A1 modes = 0.41 ;  NON-A1 modes = 1.1e-9
+      (i.e. exactly zero to machine precision -- the theorem, confirmed).
+    - every mode with a non-negligible cube integral is A1 (no exceptions).
+    - threshold-"dead" fraction = 0.90 ~ 7/8 = 0.875  (matches the 0.88
+      measured independently in rung 5c).
+
+  QUASICRYSTAL plate (symmetry broken):
+    - characters are NOT clean (+/-1): e.g. [+1,-0.13,+0.98,+0.98,-0.13] --
+      the irreps are mixed because D4 is broken.
+    - mean |integral phi^3| of "non-A1" modes = 0.28  (NOT zero -- rule lifted).
+    - threshold-"dead" fraction = 0.35  (vs 0.90 for periodic).
+
+
+--------------------------------------------------------------------------------
+8. THE PORTABLE STATEMENT (why anyone outside MEMS should care)
+--------------------------------------------------------------------------------
+Nothing above used plates or MEMS specifically. The only ingredients were:
+(i) a physical reservoir whose computational primitives are its modes; (ii) an
+even-order nonlinearity whose modal strength is integral phi^3; (iii) a point
+symmetry group. The theorem therefore applies to ANY symmetric physical
+computing substrate -- photonic cavities, spin-wave devices, mechanical
+metamaterials, electronic resonator arrays:
+
+   The point symmetry of a physical computing substrate GATES which nonlinear
+   computations its modes can perform. A symmetric substrate is blind to
+   even-order computation in all but its totally-symmetric modes; breaking the
+   symmetry (e.g. with an aperiodic/quasicrystalline geometry) lifts the
+   prohibition and activates even-order processing in every mode -- with no
+   added components.
+
+That is a substrate-DESIGN PRINCIPLE, proved here for D4 and confirmed on real
+finite-element modes, modest in measured magnitude but exact in origin.
+================================================================================

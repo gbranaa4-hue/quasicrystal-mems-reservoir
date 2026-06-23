@@ -1,0 +1,64 @@
+================================================================
+ZENODO UPLOAD — copy/paste fields
+(zenodo.org → New upload → fill these in)
+================================================================
+
+UPLOAD TYPE:  Publication → Preprint
+
+TITLE:
+Breaking point-group symmetry activates even-order computation in modal physical reservoirs
+
+AUTHORS:
+Branaa, Gavin   —   Affiliation: Independent Researcher
+
+LICENSE:
+Creative Commons Attribution 4.0 International (CC-BY-4.0)
+(lets anyone reuse it with credit — the standard choice for a preprint)
+
+KEYWORDS (comma-separated):
+reservoir computing, physical computing, neuromorphic computing,
+symmetry selection rule, group theory, point group, even-order nonlinearity,
+MEMS resonator, quasicrystal, mode shapes
+
+----------------------------------------------------------------
+DESCRIPTION  (paste this whole block)
+----------------------------------------------------------------
+Physical reservoir computing uses the nonlinear dynamics of a fixed material
+system to process signals, training only a simple linear readout. A common
+intuition holds that geometrically "richer" substrates — quasicrystalline or
+otherwise aperiodic resonator structures — should make better reservoirs. Using
+a finite-element modal model of a perforated micro-plate, this work finds that
+intuition is largely false: the structural richness of a quasicrystalline mode
+spectrum, and of the mode-shape-determined nonlinear coupling network, is real
+but computationally inert.
+
+The one genuine advantage identified has an exact explanation. A point-group
+selection rule is proved: on a substrate with the square's D4 symmetry, the
+integral of the cube of each mode shape — the modal strength of the even-order
+nonlinearity that alone can generate products of past inputs — vanishes
+identically for every mode except the totally symmetric ones, forcing a
+fraction 7/8 of modes to be "product-blind." Breaking the point symmetry (with
+an aperiodic hole pattern, or simply a lower-symmetry cavity shape) lifts the
+prohibition. The result is confirmed on real finite-element modes to one part
+in 10^9.
+
+The computing consequence is statistically robust but deliberately bounded: on
+shallow even-order tasks in the weakly coupled regime, a symmetry-broken
+substrate outperforms a symmetric one, with the advantage scaling with the
+degree of symmetry breaking — a periodic but low-symmetry plate captures about
+half the effect. The benefit does not extend to deep-memory tasks or standard
+benchmarks (NARMA-10), a limit traced to the conserved memory–nonlinearity
+budget of any reservoir. The operative design principle is symmetry breaking,
+not aperiodicity, and it applies to any modal physical computer (photonic,
+spin-wave, mechanical, electronic).
+
+This deposit includes the manuscript, supplementary material (full derivation,
+controls, and cross-validation), and the complete reproducible simulation code.
+
+----------------------------------------------------------------
+FILES TO UPLOAD
+----------------------------------------------------------------
+  paper_draft.pdf         (compile paper_draft.tex on Overleaf, download PDF)
+  paper_supplement.pdf    (compile paper_supplement.tex, download PDF)
+  (optional) a .zip of this whole folder, so the code travels with the paper
+================================================================

@@ -1,0 +1,482 @@
+================================================================
+PHYSICAL RESERVOIR COMPUTING -- FINDINGS LOG
+(honest running record; each entry is what we actually learned,
+ negative results included and labeled as such)
+================================================================
+
+THE BIG QUESTION
+  Can a quasicrystal-perforated MEMS plate act as a physical reservoir
+  computer -- and does its aperiodic mode structure make it a BETTER
+  reservoir than an ordinary periodic plate?
+
+We climb a ladder of rungs. Each rung is a self-contained, controlled
+test. A rung that returns "no" is still a result; we record it and keep
+going only where a real unknown remains.
+
+----------------------------------------------------------------
+RUNG 1  -- do nonlinear oscillator networks compute at all?   [PASS]
+  File: reservoir_rung1.py
+  Generic Duffing-type oscillators, proper controls.
+    - Nonlinear task y[n]=u[n-1]*u[n-2]:  R^2 = 0.71
+      (linear-reservoir control -0.05; raw-input baseline -0.01)
+      => only the NONLINEAR PHYSICS solves it, not the readout.
+    - Fading memory capacity: 10.45.
+  SCOPE: reproduces a KNOWN principle on a validated testbed. Not novel
+  by itself; it earns the right to ask the real question credibly.
+
+----------------------------------------------------------------
+RUNG 2 & 3 -- does the quasicrystal mode SPECTRUM help?   [NEGATIVE]
+  Files: reservoir_rung2_3.py, reservoir_rung3_sizesweep.py
+  Method: pull the REAL first-40 mode frequencies from the project FEM
+  for a quasicrystal plate and a periodic plate, MATCHED to the same
+  hole coverage; normalize both to the same band so the comparison
+  isolates the internal DISTRIBUTION of the modes; build identical
+  generic nonlinear reservoirs differing ONLY in those frequencies;
+  average over reservoir seeds with mean +/- std.
+
+  STRUCTURAL FACT (real, confirmed): the quasicrystal spectrum has far
+  fewer near-degenerate mode pairs than the periodic one --
+      quasicrystal = 3   vs   periodic = 18.
+  The degeneracy-breaking the theory predicts is genuinely there.
+
+  PERFORMANCE RESULT (the actual test): NO ADVANTAGE.
+      nonlinear task R^2:  QC 0.647 +/- 0.068   vs   periodic 0.654 +/- 0.065
+      memory capacity:     QC 11.23             vs   periodic 11.24
+    Difference is well within the seed-to-seed spread -> no winner.
+
+  PRE-REGISTERED FOLLOW-UP (rung3 size sweep): the one place the
+  mechanism predicted an advantage was at SMALL reservoir size, where
+  wasted (degenerate) modes should hurt most. We swept N = 6..40 and
+  raced the two real spectra at each size.
+      => TIE at every size within error bars; at the SMALLEST size
+         (N=6, most scarce) periodic was if anything slightly BETTER.
+      => mean (QC - periodic) nonlinear R^2 at small N (<=12) = -0.047
+         (negative -- the wrong sign for the hypothesis).
+
+  HONEST VERDICT (rungs 2 & 3):
+    The mode-frequency DISTRIBUTION does not matter for reservoir
+    computing in this model. The quasicrystal's spectral richness is a
+    real structural property but a COMPUTATIONALLY INERT one. The
+    "aperiodic spectrum => better reservoir" intuition, via the
+    degeneracy mechanism, is NOT supported. This is a clean negative
+    result from a pre-registered mechanism -- worth more than a positive
+    result from knob-fishing, which we deliberately did not do.
+
+  WHAT THIS DID NOT TEST (the door still open):
+    We used the real mode FREQUENCIES but a GENERIC, identical
+    nonlinearity with RANDOM input/coupling weights -- so we isolated
+    the spectrum and nothing else. Two physical ingredients were held
+    artificial and could still carry a real difference:
+      (a) the mode SHAPES (spatial structure) -- which set how input
+          couples in and how modes nonlinearly mix; and
+      (b) the plate's TRUE nonlinear coefficients.
+    Rung 4 attacks (a).
+
+----------------------------------------------------------------
+RUNG 4  -- do the quasicrystal mode SHAPES help?   [NEGATIVE]
+  File: reservoir_rung4_modeshapes.py
+  Stopped using random input/coupling weights; derived them from the
+  plate's ACTUAL mode shapes (FEM eigenvectors):
+    - input weights  w_in[i] = phi_i(x_drive)  (a point actuator couples
+      to each mode by that mode's amplitude at the drive location);
+    - nonlinear mode coupling = modal projection of a pointwise
+      quadratic+cubic transverse nonlinearity, so modes couple through the
+      REAL spatial overlap of their shapes -- NOT a random matrix.
+  Now quasicrystal vs periodic differ in BOTH frequencies AND the entire
+  coupling network, and that network is set by physics, not by us.
+
+  STRUCTURAL FACT (real, confirmed, and LARGE): exactly as predicted, the
+  periodic plate's symmetric mode shapes make many triple-overlap coupling
+  integrals vanish, and the quasicrystal breaks that --
+      triple-overlap density (frac of |T_ijk| non-negligible):
+          quasicrystal = 0.835   vs   periodic = 0.344  (~2.4x denser).
+  This is a far BIGGER structural difference than the spectrum's 3-vs-18
+  degeneracy gap. The quasicrystal's coupling network is genuinely, richly
+  denser. The pre-registered mechanism HOLDS.
+
+  PERFORMANCE RESULT: NO ADVANTAGE (again).
+      nonlinear task R^2:  QC 0.197 +/- 0.075  vs  periodic 0.222 +/- 0.048  (tie)
+      memory capacity:     QC 8.27  +/- 0.74   vs  periodic 7.59  +/- 0.44   (tie)
+    (An 8-drive-location run showed a 1.2x memory hint for QC; widening to
+     16 locations collapsed it to 0.8x -- it was small-sample noise, not
+     signal. State amplitudes ~0.11 with the nonlinear term comparable to
+     the linear restoring force, so the nonlinearity is genuinely engaged,
+     not dormant -- the tie is real, not an artifact of a dead nonlinearity.)
+
+  HONEST VERDICT (rung 4):
+    The quasicrystal's mode-shape-derived coupling network is ~2.4x denser
+    -- a real, large, physics-set structural advantage -- and it is
+    COMPUTATIONALLY INERT. The mode shapes don't help either.
+
+----------------------------------------------------------------
+----------------------------------------------------------------
+RUNG 5 -- mechanism test: does the coupling STRUCTURE matter anywhere?  [SURPRISE]
+  File: reservoir_rung5_saturation.py
+  Dialed inter-mode coupling from 0 (uncoupled bank of nonlinear
+  oscillators = impoverished lower bound) to full strength (gamma=0..1.3),
+  racing both plates at every level.
+  RESULTS:
+    - Strong-coupling end (gamma>=0.35): the plates TIE -- reinforcing that
+      the 2.4x-denser quasicrystal coupling network is inert. Memory
+      capacity FALLS monotonically as coupling rises (coupling erodes
+      fading memory here). The "rise-then-plateau saturation" picture was
+      WRONG: performance is BEST uncoupled and coupling does not help.
+    - Uncoupled / weak-coupling end: a SURPRISE -- the quasicrystal beats
+      the periodic plate ~1.6-1.9x on the nonlinear task, an edge that
+      VANISHES as coupling is added. The first repeatable QC advantage in
+      the whole ladder -- and, since it appears with coupling OFF, it is NOT
+      a coupling effect at all. It comes from the modes' INDIVIDUAL
+      shape-derived properties.
+
+RUNG 5b -- WHY (first guess, WRONG):  [hypothesis falsified]
+  File: reservoir_rung5b_why.py
+  Guessed the uncoupled edge was higher effective dimensionality (periodic's
+  degenerate modes giving redundant features under shape-derived drive).
+  MEASURED: effective feature dim QC 3.1 vs periodic 3.2 (identical), modes
+  excited by drive 18.6 vs 17.8 (identical). Hypothesis FALSE. The gap
+  (robust at 2.2x spread with 24 drives) is real but not dimensional.
+
+RUNG 5c -- WHY (the real mechanism, PINNED):  [POSITIVE, mechanism-level]
+  File: reservoir_rung5c_mechanism.py
+  The nonlinear task y=u[n-1]u[n-2] is a PRODUCT; the only product-generating
+  term is the QUADRATIC self-nonlinearity c2_i*x_i^2, c2_i = integral(phi_i^3
+  dA). The periodic plate has the square's full D4 symmetry, so its
+  ANTISYMMETRIC modes have phi(-x)=-phi(x) -> phi^3 antisymmetric ->
+  c2_i = 0 EXACTLY by selection rule. The quasicrystal has no exact mirror
+  symmetry, so every mode keeps a live quadratic term.
+  STRUCTURAL FACT: fraction of modes with a near-dead quadratic term --
+      periodic = 0.88   vs   quasicrystal = 0.38   (mean |c2|: 0.081 vs 0.338).
+  ABLATION (decisive):
+      baseline gap            = +0.102 (1.8x)
+      EQUALIZE c2  -> gap     = +0.003 (0.1x)   [collapses -> c2 WAS the cause]
+      EQUALIZE freqs -> gap   = +0.107 (1.9x)   [survives -> spectrum was NOT]
+  => MECHANISM PINNED: the uncoupled quasicrystal edge is a QUADRATIC
+     SYMMETRY-SELECTION-RULE effect. Periodic symmetry zeroes the
+     product-generating nonlinearity in ~88% of its modes; the quasicrystal's
+     broken symmetry keeps it alive in nearly all. This is the FIRST and ONLY
+     genuine, mechanistically-explained quasicrystal advantage in the ladder.
+     SCOPE (do not overclaim): it is MODEST (~0.10 R^2, ~1.8x spread), lives
+     only in the WEAKLY-COUPLED regime (full coupling erases it), and applies
+     to EVEN-ORDER (product) tasks specifically.
+
+----------------------------------------------------------------
+RUNG 6 -- STRESS-TEST the finding: does it generalize?   [PASS on all 3 axes]
+  File: reservoir_rung6_stresstest.py
+  Tried hard to break the rung-5c conclusion along three axes (all gamma=0,
+  fast independent-oscillator integrator).
+
+  A. TASK GENERALITY (the sharpest test). A quadratic selection rule must win
+     EVERY even-order task and TIE every odd-order one (c3=integral(phi^4)
+     has an even integrand, so symmetry never kills the cubic term).
+       even tasks (u1*u2, u1^2, u1*u3, u2*u3, u1u2+u2u3):
+           QC wins ALL 5, gaps +0.07..+0.23, significance +1.4x..+2.9x.
+       odd tasks (u1, u2, u1^3, u1*u2*u3, u1-0.5u2):
+           ALL 5 TIE, gaps within +/-0.007, significance < 1x.
+       => mean gap even = +0.150, odd = -0.002. A textbook-clean even/odd
+          dichotomy -- the exact fingerprint of the c2=integral(phi^3)
+          selection rule and nothing else.
+
+  B. GEOMETRY ROBUSTNESS. Even-task edge (u1*u2) across geometry:
+       coverage 78/85/92% -> +2.7x / +1.9x / +1.4x (persists, fades slightly
+         as coverage rises);
+       QC symmetry 5/7/8/12-fold -> +2.1x / +1.7x / +1.9x / +1.3x (every
+         quasicrystal symmetry breaks the periodic D4, so every one shows the
+         edge; 8-fold is not special). 100% of configs keep the edge.
+
+  C. PHYSICAL EVEN NONLINEARITY. Swapped the generic a*w^2 for an
+     ELECTROSTATIC-style even term (softening sign, different magnitude, plus
+     spring-softening, with mechanical cubic hardening for stability):
+       even task u1*u2 -> QC +1.4x (survives);  odd task u1^3 -> tie (-0.8x).
+     The edge is a symmetry property of integral(phi^3), not of the
+     coefficient -- so it survives a physically-grounded even nonlinearity.
+
+  VERDICT: the finding HOLDS UP. Robust across tasks (even/odd dichotomy),
+  geometry (coverage & quasicrystal symmetry), and nonlinearity model. A
+  genuine symmetry selection rule, not an artifact. Still MODEST (~0.1-0.2
+  R^2) and confined to the weakly-coupled regime -- but real and confirmed.
+
+----------------------------------------------------------------
+RUNG 7 / 7b -- NARMA-10 reality check + depth scoping   [SCOPE-TIGHTENING]
+  Files: reservoir_rung7_narma.py, reservoir_rung7b_depth.py
+  Ran the field-standard benchmark NARMA-10 (input u[n], target with a deep
+  even product 1.5 u[n]u[n-9] plus strong linear/recurrent memory).
+    NARMA-10 result: TIE. QC 0.327 vs periodic 0.314 (+0.012, 0.7x), both at
+    low absolute R^2 ~0.32; edge shrinks with coupling (0.7x -> 0.3x).
+  Why (rung 7b, decisive): raced PURE even products y=u[n-1]*u[n-d] vs depth:
+        d=2:  QC 0.497 / per 0.352  (+2.0x)   <- clear QC win
+        d=3:  QC 0.261 / per 0.076  (+2.7x)   <- clear QC win
+        d=5:  QC 0.022 / per 0.011  (both ~0) <- task no longer doable
+        d=9:  QC -0.01 / per -0.02  (both FAIL)
+    The reservoir CANNOT do deep products at all (absolute R^2 collapses 0.50
+    -> ~0 by d=5 -> negative by d=9), QC or not. So the even-order edge is a
+    SHALLOW-MEMORY effect: it appears only where the task is actually doable
+    (depth <= ~3). NARMA-10 ties because (a) its even term is deep (lag 9,
+    where nobody succeeds) and (b) its variance is dominated by linear/
+    recurrent memory both plates handle equally.
+  INTRINSIC TENSION (honest): the edge needs WEAK coupling (effective dim ~3),
+  but deep tasks need the memory/dimension that only COUPLING provides -- and
+  coupling erases the edge. No sweet spot exists. NARMA was the right test and
+  it did its job: it stopped the finding from being overclaimed.
+
+----------------------------------------------------------------
+PEER REVIEW / CROSS-VALIDATION   [edge CONFIRMED + one framing CORRECTION]
+  File: peer_review_crossval.py
+  Adversarially stress-tested the shallow even-order computing edge (5 input
+  seeds x 8 drive locations = 40 paired samples, blocked k-fold CV, real
+  paired statistics). Four referee objections, results:
+
+  CHECK 1 (proper statistics): edge is OVERWHELMING, not marginal. Even-task
+    QC 0.457 vs periodic-D4 0.273; mean gap +0.184, 95% CI [+0.154,+0.217],
+    paired t p=1e-13, Wilcoxon p=2e-12, QC>periodic in 100% of 40 pairs. The
+    old "1.8x spread" heuristic was CONSERVATIVE. Odd control: gap +0.000
+    (negligible; a hypersensitive test flags a microscopic residual at ceiling,
+    but the even/odd effect-size ratio is ~400:1 -- exactly the selection rule).
+
+  CHECK 2 (feature-scaling confound -- the deepest objection): the edge
+    SURVIVES standardizing the feature columns (z-score): gap +0.148, p=2e-21.
+    So it is NOT a "QC has bigger |c2| -> bigger features" artifact; it is
+    genuinely about which modes can REPRESENT products. A c2=0 (symmetric)
+    mode is product-blind at ANY scale. Mechanism confirmed.
+
+  CHECK 3 (lambda sensitivity): edge persists across 5 decades of ridge lambda
+    (1e-6..1e-1), gap +0.15..+0.22, 100% of pairs every time. Not a
+    regularization artifact.
+
+  CHECK 4 (symmetry vs quasicrystallinity -- THE CORRECTION): a LOW-SYMMETRY
+    PERIODIC plate (sheared/anisotropic grid, D4 broken) gets a big chunk of
+    the edge over the D4 grid. Performance tracks the c2 dead-fraction
+    MONOTONICALLY:
+        D4 periodic    : dead 0.88 -> R^2 0.273
+        low-sym periodic: dead 0.72 -> R^2 0.362  (+0.089 over D4, p=2e-10)
+        quasicrystal   : dead 0.38 -> R^2 0.457  (+0.095 over low-sym, p=4e-15)
+    => The effect is driven by BROKEN POINT SYMMETRY, not aperiodicity per se.
+       The quasicrystal is simply the MAXIMAL symmetry-breaker (lowest dead
+       fraction), hence the largest edge. A periodic plate breaks enough
+       symmetry to capture ~half the benefit. This CORRECTS the framing:
+       the claim is "break the substrate's point symmetry", with the
+       quasicrystal as one convenient, maximal way to do it -- NOT
+       "quasicrystals are special". A necessary correction caught BEFORE
+       writeup; the corrected claim is more general and more defensible.
+
+----------------------------------------------------------------
+THE PATTERN (synthesis after rungs 2-7 + peer review) -- the real discovery
+  The quasicrystal's structural richness is REAL and confirmed at THREE
+  independent levels:
+      - spectrum:  3 vs 18 near-degenerate mode pairs (rungs 2-3);
+      - coupling:  0.835 vs 0.344 triple-overlap density (rung 4, ~2.4x);
+      - even-order self-nonlinearity: 38% vs 88% modes with a dead quadratic
+        term (rung 5c).
+  The first TWO are COMPUTATIONALLY INERT (no reservoir advantage at any size
+  or coupling strength). The THIRD is NOT: it gives a real, modest,
+  mechanism-level edge -- but only in the weakly-coupled regime and only on
+  even-order tasks.
+
+  WHY the coupling richness is inert: reservoir computing needs a reservoir
+  merely "rich ENOUGH"; a periodic plate already clears that bar, so extra
+  coupling richness is redundant. Matches the RC literature (very different
+  topologies perform alike once each is rich enough).
+
+  WHY the even-order edge is real: it is not about "richness" at all -- it is
+  a SYMMETRY selection rule. Periodic symmetry forbids the product-generating
+  nonlinear term in most modes; aperiodicity permits it everywhere. Symmetry
+  arguments are robust to model details, so this one is more trustworthy than
+  a tuned numeric.
+
+  IMPLICATION FOR THE VON KARMAN LIFT: the real flat-plate von Karman
+  nonlinearity is CUBIC (odd, w^3-type, from in-plane stretching). An odd
+  nonlinearity is symmetric under u->-u and CANNOT by itself perform an EVEN
+  (product) task -- and the quadratic selection rule above does not apply to
+  it. So the von Karman lift specifically targets the COUPLING regime we have
+  shown to be inert, with an ODD nonlinearity that cannot express the one
+  effect we did find. Its prior of revealing a quasicrystal advantage is now
+  LOW for a principled reason, not just effort. The genuine effect lives in
+  EVEN-ORDER nonlinearity + symmetry breaking, not in von Karman coupling.
+
+  STATUS OF THE FINDING: now STRESS-TESTED and robust (rung 6) -- it holds
+  across all even-order tasks (and is correctly absent on odd ones), across
+  coverage and quasicrystal symmetry, and under a physical electrostatic even
+  nonlinearity. This is a real, confirmed, mechanism-level result, modest in
+  magnitude and scoped to the weakly-coupled even-order regime.
+
+  PROVEN ANALYTICALLY (see PROOF_selection_rule.txt, verify_selection_rule.py):
+  the selection rule is an exact group-theory theorem, not a numerical
+  accident. For a D4-symmetric plate, integral(phi_i^3 dA)=0 for EVERY mode
+  except the totally-symmetric A1 irrep (proof: the integral projects onto the
+  trivial rep, and Sym^3(rho) contains A1 only for rho=A1; in particular
+  Sym^3(E)=2E contains no A1). The symmetry-projected Weyl law gives an A1
+  fraction of (dim)^2/|G| = 1/8, so 7/8 = 87.5% of modes are forbidden --
+  THE ORIGIN OF THE MEASURED 88%. Numerical check on the real FEM modes:
+  non-A1 modes have mean |integral phi^3| = 1.1e-9 (zero to machine precision),
+  every nonzero-cube mode is A1, dead fraction 0.90 ~ 7/8; the quasicrystal
+  breaks D4 so its non-A1 modes are nonzero (mean 0.28) -- rule lifted. The
+  result now stands on an exact theorem confirmed mode by mode.
+
+----------------------------------------------------------------
+CAVITY SHAPE AS A SYMMETRY KNOB   [CONFIRMED, with a threshold qualification]
+  File: cavity_symmetry.py
+  Tests whether the CONTAINER (boundary), not just the hole pattern, can break
+  the point symmetry and activate the even-order edge. Ordinary PERIODIC hole
+  array in cavities of decreasing symmetry (rectangular domain + sheared
+  "parallelogram" cavity via FEM surgery: topological clamping, sheared mesh).
+
+  SILENCED FRACTION tracks the cavity's point group as predicted (finite-size
+  elevated): square D4 0.88 (~7/8); rectangle C2v 0.80-0.85 (~3/4);
+  parallelogram C2 0.57 (~1/2); quasicrystal 0.40. The container shape
+  demonstrably controls which modes are symmetry-silenced.
+
+  PERFORMANCE (even task u[n-1]u[n-2], odd control u[n-1]):
+      square periodic (D4)    silenced 0.88   even R^2 0.369
+      rect cavity 1.3 (C2v)   silenced 0.85   even R^2 0.321
+      rect cavity 1.6 (C2v)   silenced 0.80   even R^2 0.371
+      parallelogram (C2)      silenced 0.57   even R^2 0.464   <-- PERIODIC plate
+      quasicrystal (ref)      silenced 0.40   even R^2 0.460
+      odd-task R^2 = 1.000 for ALL cavities (flat -- selection rule respected).
+
+  HEADLINE CONFIRMED: the parallelogram is a PERIODIC plate (square hole grid
+  in a sheared cavity); it MATCHES the quasicrystal's even-order edge
+  (0.464 vs 0.460) with NO aperiodicity. The cavity boundary is a genuine
+  symmetry-breaking design knob; aperiodicity is not required.
+
+  QUALIFICATION (honest): the relationship is NOT smoothly monotonic -- it is a
+  THRESHOLD. Mild symmetry breaking (rectangle, D4->C2v) keeps both axis
+  mirrors, barely moves the silenced fraction at 40 low modes, and gives no
+  resolvable edge (rect within noise of square). You must break the MIRRORS
+  (shear/parallelogram, ->C2) before the edge appears. So the corrected claim
+  is "breaking the cavity's mirror symmetry recovers the edge", not "any cavity
+  deformation tunes it." (Minor caveat: sheared-cavity coverage uses a
+  bounding-box approximation; the silenced fraction is from the true FEM modes
+  and is robust to it.)
+
+  IMPLICATION FOR THE PAPER: a clean strengthening -- the symmetry that matters
+  can be broken by the CONTAINER, not just the perforation, and a low-symmetry
+  PERIODIC cavity reaches quasicrystal performance. Reinforces the central
+  correction (it's symmetry, not quasicrystallinity) with an independent knob.
+
+----------------------------------------------------------------
+BANDGAP ISOLATION -- "keep only the active modes for higher SNR"?   [REFUTED]
+  File: bandgap_isolation.py
+  Tested the concrete claim that a bandgap should isolate only the
+  int(phi^3)-ACTIVE modes, dropping "inactive/noisy" silenced modes to raise
+  SNR. Partitioned modes by |c2| and evaluated the even task reading out from
+  ALL vs ACTIVE-only vs SILENCED-only, at 0/5/10% readout noise.
+  RESULT (clean readout): isolation HURTS, badly.
+      square:        ALL 0.306  active-only -0.014  (gain -0.321)
+      parallelogram: ALL 0.520  active-only  0.231  (gain -0.289)
+      quasicrystal:  ALL 0.501  active-only  0.441  (gain -0.060)
+  WHY: the even-order computation is DISTRIBUTED across the whole mode
+  population, not concentrated in a few "active" modes. (a) The exact selection
+  rule zeroes only the symmetry-forbidden modes; many below-threshold modes
+  still carry small but nonzero c2 -- "silenced-only" readout still reaches
+  R^2 0.07-0.28. (b) The silenced/linear modes also supply MEMORY the active
+  modes need. Pruning the population throws away both.
+  The only regime where active-only "wins" is heavy noise (10%), but there
+  ALL configs sit at R^2 ~ 0 -- a meaningless "less-bad-when-all-bad" effect.
+  VERDICT: bandgaps give real design control and (correctly per the block) do
+  NOT fix the memory wall, but using them to PRUNE modes is counterproductive
+  for this reservoir. The "isolate active modes -> higher SNR" claim is false
+  at usable readout quality. The defect-mode (single localized mode) and
+  frequency-multiplex ideas inherit the same flaw: fragmenting/shrinking the
+  mode population removes the distributed computation and memory.
+
+----------------------------------------------------------------
+FULL OPTOMECHANICAL SIMULATION -- would the experiment see the edge?  [de-risking]
+  File: full_sim_optomech.py
+  Added the three realities of a cavity-optomechanical implementation to the
+  validated reservoir: all-optical SPOT readout (membrane displacement at M
+  laser spots, not full modal access) + detection NOISE + imperfect optical-
+  spring frequency setting. Tested whether the even-order edge survives.
+    TEST 1 (readout noise, M=20): edge +0.143 noiseless (p=5e-6) but washes out
+      fast -- significant only to ~2% noise (SNR~50); gone by 5% (p=0.2).
+    TEST 2 (channels, 5% noise): M=6 does NOT resolve it (+0.004, n.s.);
+      need M>=~12 (p=0.04) to ~40 (+0.038, p=2e-3). Spot readout is lossy:
+      absolute R^2 falls from ~0.50 (full modal) to ~0.1 and can go negative.
+    TEST 3 (optical-spring tuning error): edge ROBUST to +/-20% per-mode
+      frequency error (it is not the limiting factor).
+  HONEST CONCLUSION: demonstrating the COMPUTING edge through a noisy, few-
+  channel all-optical readout is HARD (needs SNR >~50 and >~12 channels; the
+  "6-laser" architecture under-samples the modes). BUT the selection rule is a
+  statement about MODE SHAPES, so the robust experimental test is DIRECT
+  mode-shape imaging (scan the laser, image each phi_i, compute int(phi_i^3)
+  and watch it vanish for forbidden modes / revive when symmetry breaks) -- a
+  standard, high-SNR optomechanical measurement that does not depend on
+  reservoir performance or channel count. The full sim confirms the paper's
+  experimental outlook points the right way: image the modes, not the task.
+  LIMITS UNCHANGED: optics reconfigures linear properties + readout only; the
+  ~3-step nonlinear memory ceiling stands.
+
+----------------------------------------------------------------
+THE MEMORY WALL -- can this be a sequence/LLM substrate?   [HARD NO, fundamental]
+  File: memory_wall.py
+  Make-or-break test for any "hybrid sequence model / working memory" ambition.
+  Pushed the memory knob (damping zeta, the echo-state leak-rate analog) from
+  0.20 down to 0.01 (Q = 1/2zeta = 2.5..50) and measured the depth ceilings.
+  THREE walls, all closing on the same conclusion:
+
+  (1) NONLINEAR (product) depth is walled at ~3 and IMMOVABLE. Best even-order
+      product depth (R^2>0.3) = 3 samples, at zeta=0.20; lowering zeta to chase
+      memory makes it WORSE (d=2 at zeta=0.1, then 0). The even-order edge lives
+      only at d<=3.
+  (2) LINEAR memory CAN be pushed deeper (R^2>0.5 to depth ~20-23 at zeta=0.1),
+      BUT it is undifferentiated -- the quasicrystal vs periodic gap on linear
+      recall is ~0.00 at every depth (k=5,10,20). The device's ONLY special
+      property (the even-order symmetry edge) does nothing for linear memory,
+      and a plain delay line does linear memory anyway.
+  (3) The ECHO-STATE PROPERTY (fading memory) FAILS for zeta<=0.05: the driven
+      nonlinear resonator stops forgetting its initial state. So the deep-linear
+      regime is not even usable; the longest STABLE damping is zeta~0.1.
+
+  ROOT CAUSE (not a bug): the memory-nonlinearity tradeoff -- total computational
+  capacity is conserved (Dambre et al., Sci. Rep. 2012). Extending linear memory
+  trades AWAY nonlinear capacity; the even-order computation the symmetry edge
+  helps is exactly what does NOT scale with memory.
+
+  IMPLICATION: a sequence/language model needs NONLINEAR dependencies over
+  10^2-10^4 steps. This device caps nonlinear depth at ~3 -- 2 to 4 orders of
+  magnitude short, on the very axis that matters, for fundamental (conserved-
+  capacity + echo-state-stability) reasons, not tuning. The "quasicrystal MEMS
+  as working memory in an Echo State Transformer" proposal fails specifically
+  because the device's only differentiated capability (even-order symmetry edge)
+  does not scale with memory, and its scalable capability (linear memory) is
+  undifferentiated. Honest niche: a SHALLOW (<=3 step) even-order nonlinear
+  feature element -- not a sequence-modeling substrate.
+
+----------------------------------------------------------------
+HONEST BOTTOM LINE (as of this log)
+  Proven: oscillator reservoirs compute (rung 1). The quasicrystal's
+  structural richness in its mode SPECTRUM and its mode-shape COUPLING
+  network is real but COMPUTATIONALLY INERT (rungs 2-5).
+
+  The ONE genuine quasicrystal advantage is a QUADRATIC SYMMETRY-SELECTION-
+  RULE effect, and it has TWO layers of confidence:
+    * BULLETPROOF (exact theorem, rung 5c + PROOF_selection_rule.txt):
+      on a D4-symmetric plate integral(phi_i^3)=0 for all non-A1 modes; the
+      forbidden fraction is exactly 7/8=87.5% (the measured 88%); aperiodicity
+      lifts the rule. Confirmed on real FEM modes to 1e-9. This is true
+      regardless of any computing application.
+    * REAL BUT NARROW (rungs 6, 7b; cross-validated): the computing benefit
+      shows up only on SHALLOW even-order tasks (memory depth <= ~3) in the
+      WEAKLY-COUPLED regime. Within that regime it is STATISTICALLY ROCK-SOLID
+      (paired t p~1e-13, 100% of 40 seed x drive pairs, survives k-fold CV,
+      feature standardization, and a 5-decade lambda sweep) -- but modest in
+      magnitude (~0.15 R^2). It does NOT survive to deep even-order tasks (the
+      reservoir cannot do those at all here) and does NOT win NARMA-10 (deep +
+      mostly linear -> tie). Intrinsic tension: the edge needs weak coupling,
+      deep tasks need the dimension only coupling brings, and coupling kills
+      the edge.
+    * CORRECT ATTRIBUTION (peer review check 4): the benefit is driven by
+      BROKEN POINT SYMMETRY, not aperiodicity per se. Performance tracks the
+      c2 dead-fraction monotonically across D4-periodic (0.88), low-symmetry
+      periodic (0.72), and quasicrystal (0.38); a low-symmetry PERIODIC plate
+      captures ~half the edge. The quasicrystal is the MAXIMAL symmetry-breaker,
+      not a special case.
+
+  So: an elegant, exact symmetry theorem with a modest, sharply-scoped,
+  cross-validated computing consequence. The honest writeup leads with the
+  THEOREM and the portable principle "BREAKING a substrate's point symmetry
+  activates even-order computation" (quasicrystal = maximal breaker), and
+  presents the reservoir benefit as a real-but-bounded illustration -- not a
+  benchmark-beating or quasicrystal-is-special device claim.
+  The von Karman lift remains principled-low (odd/cubic, coupling regime).
+  Throughout: REAL FEM physics where labeled, MODEL nonlinearity where
+  labeled, no fabricated-device claims.
+================================================================

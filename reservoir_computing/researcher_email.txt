@@ -1,0 +1,43 @@
+================================================================
+DRAFT EMAIL to a physical-reservoir-computing researcher
+(replace [Name] and [link]; keep it short — researchers read short)
+================================================================
+
+SUBJECT:  A point-group selection rule for even-order reservoir computing (preprint)
+
+----------------------------------------------------------------
+
+Dear Dr. [Name],
+
+I'm an independent researcher and I've just posted a short preprint I think may
+be of interest given your work on physical reservoir computing.
+
+The result is a point-group selection rule: on a modal resonator with the
+square's D4 symmetry, the cubic mode overlap ∫φ³ — the modal strength of the
+even-order nonlinearity needed to compute products of past inputs — vanishes
+exactly for every mode outside the totally symmetric representation, silencing
+7/8 of modes. Breaking the point symmetry (aperiodic perforation, or just a
+lower-symmetry cavity) lifts it. I prove it by group theory and confirm it on
+finite-element modes to ~1e-9, and I show the computing benefit is real but
+bounded — it tracks the degree of symmetry breaking, so the operative variable
+is symmetry, not aperiodicity, and it doesn't survive to deep-memory tasks.
+
+It's a modest, simulation-only result, and I've tried hard to state its limits
+honestly rather than oversell it. I'd genuinely value any reaction — whether
+the framing holds up, whether it overlaps something already known, or whether
+it's worth pursuing experimentally (e.g. measuring ∫φ³ optomechanically).
+
+Preprint (with full code): [link]
+
+Thank you for your time,
+Gavin Branaa
+
+----------------------------------------------------------------
+WHO TO SEND IT TO (a few real research directions to look up first):
+  - groups working on physical / photonic / spintronic reservoir computing
+  - the authors of the reservoir-computing review you cite (Tanaka et al. 2019)
+  - MEMS / phononic resonator-array groups, and cavity-optomechanics groups
+    (for the experimental mode-imaging angle)
+Find a recent paper near your topic, email the corresponding author. One real,
+specific email beats ten generic ones.
+================================================================

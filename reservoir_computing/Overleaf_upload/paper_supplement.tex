@@ -1,0 +1,243 @@
+\documentclass[aps,prapplied,reprint,amsmath,amssymb,floatfix]{revtex4-2}
+% Companion supplement to paper_draft.tex. If revtex4-2 is unavailable,
+% switch to \documentclass[twocolumn]{article} and remove \affiliation.
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{bm}
+
+\begin{document}
+
+\title{Supplementary Material:\\
+Breaking point-group symmetry activates even-order computation\\
+in modal physical reservoirs}
+\author{Gavin Branaa}
+\affiliation{Independent Researcher}
+\date{\today}
+\maketitle
+
+This supplement gives (S1) the full finite-element and reservoir parameters;
+(S2) the complete ladder of controls, including the negative results that
+establish what does \emph{not} matter; (S3) the group theory in full; (S4) the
+cross-validation and statistical protocol; and (S5) a claim-to-code
+reproducibility map. Equation and figure numbers prefixed ``S'' are local;
+unprefixed references point to the main text.
+
+\section{S1. Model parameters}
+
+\begin{table}[h]
+\caption{Finite-element and reservoir parameters held fixed throughout, unless
+a sweep is stated.}
+\label{tab:params}
+\begin{ruledtabular}
+\begin{tabular}{lll}
+symbol & value & meaning \\
+\colrule
+$E$        & $170$~GPa                 & Young's modulus (Si-like) \\
+$\nu$      & $0.28$                    & Poisson ratio \\
+$\rho$     & $2330~\mathrm{kg\,m^{-3}}$& density \\
+$h$        & $100$~nm                  & plate thickness \\
+$L_x=L_y$  & $100~\mu$m                & plate side (clamped on all edges) \\
+mesh       & $28\times28$ nodes        & Mindlin SRI quadrilaterals \\
+$N$        & $40$                      & retained transverse modes \\
+coverage   & $85\%$                    & hole area fraction (matched) \\
+QC         & 8-fold de Bruijn, seed 42 & quasicrystal hole set \\
+periodic   & $9\times9$ grid           & $D_4$-symmetric hole set \\
+low-sym    & sheared/anisotropic grid  & periodic, $D_4$ broken \\
+$\zeta$    & $0.20$                    & modal damping ratio \\
+$a,\,b$    & $0.25,\,0.25$             & quadratic, cubic nonlinearity \\
+$\Delta t$ & $0.02$ (50 substeps/sample) & integration step \\
+$[\omega_{\min},\omega_{\max}]$ & $[0.5,2.5]$ & normalized frequency band \\
+$\gamma$   & $0$ (unless swept)        & inter-mode coupling strength \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+Mode shapes are normalized to unit RMS over the plate so the two substrates
+differ only in shape and spacing, not amplitude. Frequencies are affinely
+mapped to a common band $[\omega_{\min},\omega_{\max}]$ so that the comparison
+isolates mode structure rather than absolute scale; this is conservative, as
+the raw spectrum is independently shown inert (S2). Inputs are i.i.d.\ uniform;
+a washout of $200$ samples is discarded before training; the linear readout is
+ridge regression on features $\{x_i,\dot x_i,1\}$.
+
+\section{S2. The full ladder of controls}
+
+The central claims rest on a sequence of controls each of which \emph{could}
+have produced a quasicrystal advantage and (with one exception) did not.
+Reporting the negatives is essential: they are what license attributing the
+surviving effect to symmetry alone.
+
+\paragraph{(a) Reservoir feasibility.}
+A generic network of $50$ Duffing oscillators performs the product task
+($R^2=0.71$) while the same network with nonlinearity disabled ($-0.05$) and a
+raw-input baseline ($-0.01$) fail, confirming the nonlinear dynamics, not the
+readout, perform the computation. Memory capacity $10.5$.
+
+\paragraph{(b) Spectrum is inert.}
+Matched-coverage FEM spectra: the quasicrystal has $3$ near-degenerate mode
+pairs vs.\ $18$ for the periodic plate. Yet on the product task the two tie
+($0.647\pm0.068$ vs.\ $0.654\pm0.065$) and on memory capacity ($11.2$ each).
+A size sweep $N=6\ldots40$ ties at every size; at the smallest, most
+capacity-scarce size the periodic plate is if anything better. Mean
+(QC$-$periodic) gap at $N\!\le\!12$ is $-0.047$.
+
+\paragraph{(c) Coupling network is inert.}
+Using full mode-shape-derived coupling [Eq.~(2)], the quasicrystal's cubic
+coupling network is $2.4\times$ denser (non-negligible triple-overlap fraction
+$0.84$ vs.\ $0.34$), yet product-task and memory performance tie
+($0.197\pm0.075$ vs.\ $0.222\pm0.048$). Sweeping coupling strength $\gamma$
+from $0$ to $1.3$ the two substrates track each other at every value; memory
+capacity falls monotonically with $\gamma$ (Fig.~1, main text). There is no
+operating point at which coupling richness helps.
+
+\paragraph{(d) The surviving effect is per-mode and uncoupled.}
+The only regime with a quasicrystal advantage is $\gamma=0$ (uncoupled). There
+the effective feature dimensionality is equal for both substrates
+($3.1$ vs.\ $3.2$) and the number of modes excited by the point drive is equal
+($18.6$ vs.\ $17.8$), ruling out dimensionality and input-coupling explanations
+and pointing to the per-mode quadratic coefficient $c^{(2)}_i$.
+
+\paragraph{(e) Ablation isolating $c^{(2)}$.}
+The quasicrystal has $38\%$ of modes with a near-dead quadratic term vs.\ $88\%$
+for the periodic plate (mean $|c^{(2)}|$ $0.34$ vs.\ $0.08$). Equalizing
+$c^{(2)}$ across modes collapses the product-task gap from $+0.102$ ($1.8\sigma$)
+to $+0.003$ ($0.1\sigma$); equalizing the frequencies instead leaves it intact
+($+0.107$, $1.9\sigma$). The advantage is the $c^{(2)}$ distribution, nothing
+else---which Sec.~S3 derives from symmetry.
+
+\section{S3. Group theory in full}
+
+\paragraph{Character table of $D_4$.} Classes
+$(E,\,2C_4,\,C_2,\,2\sigma_v,\,2\sigma_d)$:
+\begin{equation*}
+\begin{array}{l|rrrrr}
+        & E & 2C_4 & C_2 & 2\sigma_v & 2\sigma_d\\ \hline
+A_1 & 1 & 1 & 1 & 1 & 1\\
+A_2 & 1 & 1 & 1 & -1 & -1\\
+B_1 & 1 & -1 & 1 & 1 & -1\\
+B_2 & 1 & -1 & 1 & -1 & 1\\
+E   & 2 & 0 & -2 & 0 & 0
+\end{array}
+\end{equation*}
+
+\paragraph{One-dimensional irreps.} Since $\rho^2=A_1$ for each of
+$A_2,B_1,B_2$, their cubes are $\rho^3=\rho\neq A_1$; only $A_1^3=A_1$. Hence
+$\int\phi^3\,dA=0$ for $A_2,B_1,B_2$ modes.
+
+\paragraph{Two-dimensional irrep $E$.} Using
+$\chi_{\mathrm{Sym}^3}(g)=\tfrac16[\chi(g)^3+3\chi(g)\chi(g^2)+2\chi(g^3)]$ and
+tracking $g,g^2,g^3$ per class (e.g.\ $C_4^2=C_2$, $C_4^3=C_4^{-1}$;
+$\sigma^2=E$):
+\begin{align*}
+\chi_{\mathrm{Sym}^3}(E) &=\tfrac16[2^3+3\!\cdot\!2\!\cdot\!2+2\!\cdot\!2]=4,\\
+\chi_{\mathrm{Sym}^3}(C_4)&=\tfrac16[0+3\!\cdot\!0\!\cdot\!(-2)+2\!\cdot\!0]=0,\\
+\chi_{\mathrm{Sym}^3}(C_2)&=\tfrac16[(-2)^3+3(-2)(2)+2(-2)]=-4,\\
+\chi_{\mathrm{Sym}^3}(\sigma_v)&=\tfrac16[0+3\!\cdot\!0\!\cdot\!2+0]=0,\\
+\chi_{\mathrm{Sym}^3}(\sigma_d)&=0 .
+\end{align*}
+The character $(4,0,-4,0,0)$ has inner product with $A_1$ equal to
+$\tfrac18[1\!\cdot\!4+2\!\cdot\!0+1\!\cdot\!(-4)+0+0]=0$, and with $E$ equal to
+$\tfrac18[4\!\cdot\!2+0+(-4)(-2)+0+0]=2$. Thus $\mathrm{Sym}^3(E)=2E$,
+containing no $A_1$, so $E$ modes also have $\int\phi^3\,dA=0$. Only $A_1$
+survives, as claimed in Eq.~(4).
+
+\paragraph{Mode fractions.} The symmetry-projected Weyl law gives an
+asymptotic mode fraction $(\dim\rho)^2/|G|$ per irrep, i.e.\ $1/8$ for $A_1$ and
+$7/8$ silenced. The lowest $40$ modes over-weight symmetric sectors (the
+fundamental is $A_1$), giving a measured $A_1$ count near $20\%$; this
+finite-size bias does not affect the exact vanishing of non-$A_1$ modes, which
+holds to $1.1\times10^{-9}$ (Fig.~2, main text).
+
+\section{S4. Cross-validation and statistics}
+
+The computing claim was stress-tested over five input realizations and eight
+actuator positions ($40$ paired samples) with blocked $k$-fold cross-validation
+(contiguous test blocks; a $40$-sample purge gap suppresses reservoir-memory
+leakage across the train/test boundary). Significance uses the paired
+$t$-test and the Wilcoxon signed-rank test on the per-pair gap, with $2000$-
+resample bootstrap confidence intervals. Four referee-style checks:
+
+\begin{table}[h]
+\caption{Cross-validated robustness of the product-task advantage
+(symmetry-broken minus $D_4$ periodic). All four checks passed.}
+\label{tab:cv}
+\begin{ruledtabular}
+\begin{tabular}{lll}
+check & result & verdict \\
+\colrule
+1. paired stats   & gap $+0.184$, CI $[0.154,0.217]$, & significant \\
+                  & $p\!\approx\!10^{-13}$, $100\%$ of pairs & \\
+   odd control    & gap $+0.000$ & ties (as predicted) \\
+2. standardized   & gap $+0.148$, $p\!\approx\!10^{-21}$ & not a scaling \\
+   features       & & artifact \\
+3. $\lambda$ sweep& gap $+0.15$ to $+0.22$ over & regularization- \\
+                  & $\lambda=10^{-6}\ldots10^{-1}$ & independent \\
+4. low-sym        & monotonic with silenced & symmetry, not \\
+   periodic       & fraction (Table~\ref{tab:cv2}) & aperiodicity \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+Check~2 is decisive for mechanism: standardizing every readout feature to unit
+variance removes any advantage of larger nonlinear-feature amplitude, yet the
+effect persists---because a symmetry-silenced ($c^{(2)}=0$) mode is product-
+blind at any scale, whereas an activated mode is not.
+
+\begin{table}[h]
+\caption{Check~4: product-task performance tracks the symmetry-silenced
+fraction across substrates, periodic or not.}
+\label{tab:cv2}
+\begin{ruledtabular}
+\begin{tabular}{lcc}
+substrate & silenced fraction & product-task $R^2$ \\
+\colrule
+periodic ($D_4$)        & $0.88$ & $0.273$ \\
+periodic (low symmetry) & $0.72$ & $0.362$ \\
+quasicrystal            & $0.38$ & $0.457$ \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+\paragraph{Generality and limits.} The even/odd fingerprint holds across five
+even tasks (all won) and five odd tasks (all tied), across hole coverage
+($78/85/92\%$) and quasicrystal order ($5/7/8/12$-fold), and survives replacing
+the generic quadratic term with an electrostatic-style even nonlinearity (even
+task retained, odd task tied). The advantage is shallow: on $u[n{-}1]u[n{-}d]$
+the absolute $R^2$ of both substrates falls from $\sim\!0.5$ at $d=2$ to
+$\approx\!0$ by $d=5$ and negative by $d=9$; NARMA-10 (even term at lag~9, plus
+dominant linear recurrence) ties ($0.327$ vs.\ $0.314$).
+
+\section{S5. Reproducibility map}
+
+Each claim and figure is produced by a named script in the repository; all use
+the parameters of Table~\ref{tab:params}.
+
+\begin{table}[h]
+\caption{Claim-to-code map.}
+\label{tab:repro}
+\begin{ruledtabular}
+\begin{tabular}{ll}
+result & script \\
+\colrule
+reservoir feasibility (S2a)        & \texttt{reservoir\_rung1.py} \\
+spectrum inert (S2b)               & \texttt{reservoir\_rung2\_3.py} \\
+spectrum inert, size sweep         & \texttt{reservoir\_rung3\_sizesweep.py} \\
+coupling inert (S2c)               & \texttt{reservoir\_rung4\_modeshapes.py} \\
+saturation / Fig.~1 (S2c)          & \texttt{reservoir\_rung5\_saturation.py} \\
+dimensionality control (S2d)       & \texttt{reservoir\_rung5b\_why.py} \\
+$c^{(2)}$ ablation (S2e)           & \texttt{reservoir\_rung5c\_mechanism.py} \\
+even/odd + geometry / Fig.~3       & \texttt{reservoir\_rung6\_stresstest.py} \\
+NARMA-10                           & \texttt{reservoir\_rung7\_narma.py} \\
+depth scaling / Fig.~4             & \texttt{reservoir\_rung7b\_depth.py} \\
+selection rule / Fig.~2            & \texttt{verify\_selection\_rule.py} \\
+cross-validation / Tables~SIII--SIV& \texttt{peer\_review\_crossval.py} \\
+cavity = symmetry knob             & \texttt{cavity\_symmetry.py} \\
+cavity result, peer review         & \texttt{peer\_review\_cavity.py} \\
+optomechanical full simulation     & \texttt{full\_sim\_optomech.py} \\
+running findings log               & \texttt{FINDINGS.txt} \\
+analytic proof                     & \texttt{PROOF\_selection\_rule.txt} \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+\end{document}
